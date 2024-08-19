@@ -9,9 +9,8 @@ class DeepColorization(nn.Module):
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(input_size, input_size // 2),
             nn.ReLU(),
+            nn.Linear(input_size // 2, 2), 
             nn.ReLU(),
-            nn.Linear(input_size // 2, 2),
-            nn.Sigmoid()
         )
 
     def forward(self, x):

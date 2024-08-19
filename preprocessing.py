@@ -20,7 +20,7 @@ def return_color_image(i : int):
     return cv2.imread(new_color_img_path(i), cv2.IMREAD_COLOR)
 
 def return_yuv_image(i : int):
-    img_yuv = cv2.cvtColor(return_color_image(i), cv2.COLOR_BGR2YUV)
+    img_yuv = cv2.cvtColor(return_color_image(i), cv2.COLOR_RGB2YUV)
     return cv2.split(img_yuv)
 
 def return_evaluate_gray_image(i : int):
@@ -32,6 +32,6 @@ for i in range(1, 9, 1):
     image_path = PATH_IMAGES + image_name
     img = cv2.imread(image_path, cv2.IMREAD_COLOR)
     resized_img = cv2.resize(img, SIZE)
-    gray_image = cv2.cvtColor(resized_img, cv2.COLOR_BGR2GRAY)
+    gray_image = cv2.cvtColor(resized_img, cv2.COLOR_RGB2GRAY)
     cv2.imwrite(new_color_img_path(i), resized_img)
     cv2.imwrite(new_gray_img_path(i), gray_image)
