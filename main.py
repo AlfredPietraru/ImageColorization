@@ -4,8 +4,6 @@ import training as tr
 import preprocessing as prep
 from deep_colorization import DeepColorization 
 from skimage.feature import daisy
-import numpy as np
-WINDOW_COLUMNS = range(0, tr.MAXIM_INDEX - tr.MINIM_INDEX + 1)
 
 def train_loop(model, optimizer):
     model.train()
@@ -27,7 +25,7 @@ def train_loop(model, optimizer):
         print()
 
 def pad_matrix(matrix):
-    padding = (3, 4, 3, 4) 
+    padding = (3, 3, 3, 3) 
     padded_matrix = torch.nn.functional.pad(matrix, 
                             padding, mode='constant', value=0)
     

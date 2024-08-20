@@ -6,7 +6,7 @@ from skimage.feature import daisy
 WINDOW_SIZE = (7, 7)
 LOW_FEATURE_SIZE = 49
 MINIM_INDEX = WINDOW_SIZE[0] // 2 + 1
-MAXIM_INDEX = prep.SIZE[0] - MINIM_INDEX
+MAXIM_INDEX = prep.SIZE[0] - MINIM_INDEX + 1
 NR_SAMPLED_PIXELS = 100
 
 def get_pixel_coordinates():
