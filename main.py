@@ -4,20 +4,23 @@ import training as tr
 import preprocessing as prep
 from deep_colorization import DeepColorization 
 from skimage.feature import daisy
+import numpy as np
 
 def pad_matrix(matrix):
     return torch.nn.functional.pad(matrix, 
                             (3, 3, 3, 3), mode='constant', value=0)
 
 
-def yuv_to_rgb(y, u, v):
+def yuv_to_rgb(y : torch.Tensor, u : torch.Tensor, v : torch.Tensor):
     u = u * 255 - 128.0
     v = v * 255 - 128.0
 
-    r = y + 1.402 * v
-    g = y - 0.344136 * u - 0.714136 * v
-    b = y + 1.772 * u
-
+    r : torch.Tensor = y + 1.402 * v
+    g : torch.Tensor = y - 0.344136 * u - 0.714136 * v
+    b : torch.Tensor = y + 1.772 * u
+    # print(r[0])
+    # cv2.imshow("rosu", r.detach().numpy())
+    # cv2.waitKey(0)
 
     rgb = torch.stack([r, g, b], dim=-1)
     rgb = torch.clamp(rgb, 0, 255).byte()
@@ -40,6 +43,8 @@ def evaluation(model):
     result = torch.Tensor(model(features)).reshape(
         shape=(tr.TOTAL_SIZE, tr.TOTAL_SIZE, 2))
     u,v = result.chunk(2, dim=2)
+    print(u)
+    print(v)
     u = pad_matrix(torch.squeeze(u))
     v = pad_matrix(torch.squeeze(v))
     return yuv_to_rgb(img, u, v)

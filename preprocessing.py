@@ -20,7 +20,7 @@ def return_color_image(i : int):
     return cv2.imread(new_color_img_path(i), cv2.IMREAD_COLOR)
 
 def return_yuv_image(i : int):
-    img_yuv = cv2.cvtColor(return_color_image(i), cv2.COLOR_RGB2YUV)
+    img_yuv = cv2.cvtColor(return_color_image(i), cv2.COLOR_BGR2YUV)
     return cv2.split(img_yuv)
 
 

@@ -3,6 +3,7 @@ import torch
 from deep_colorization import DeepColorization
 import preprocessing as prep
 from skimage.feature import daisy
+import torch.nn as nn
 
 WINDOW_SIZE = (7, 7)
 LOW_FEATURE_SIZE = 49
@@ -46,13 +47,9 @@ def create_y_values(pixels : torch.Tensor, i : int):
     for i in range(NR_SAMPLED_PIXELS):
         y_values[i][0] = u[pixels[i][0]][pixels[i][1]]
         y_values[i][1] = v[pixels[i][0]][pixels[i][1]]
-    return y_values / 125
+    return y_values / 128
 
-
-def loss_function(y_computed : torch.Tensor, y_features : torch.Tensor):
-    return torch.sum(pow(torch.norm(y_computed-y_features), 2))
-
-def train_loop(model, optimizer):
+def train_loop(model, optimizer, loss_function):
     model.train()
     for k in range(1, 3, 1):
         for i in range(1, 7, 1):
@@ -63,16 +60,22 @@ def train_loop(model, optimizer):
                                     extract_middle_features(pixels, img))
                 y_computed = model(x_features)
                 y_features = create_y_values(pixels, i)
-                loss = loss_function(y_computed, y_features)
+                print(torch.reshape(y_computed, shape=(1, len(y_computed) * 2)))
+                loss = loss_function(
+                    torch.reshape(y_computed, shape=(1, len(y_computed) * 2)),
+                    torch.reshape(y_features,shape=(1, len(y_features) * 2)) 
+                        ),
                 print(loss)
-                loss.backward()
-                optimizer.step()
+                print(loss)
                 optimizer.zero_grad()
-        print("a terminat o imagine")
-        print()
+                loss[0].backward()
+                optimizer.step()
+            print("a terminat o imagine")
+        print("gata o epoca")
 
 if __name__ == "__main__":
     model = DeepColorization()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-    train_loop(model, optimizer)
+    loss_function = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    train_loop(model, optimizer, loss_function)
     torch.save(model.state_dict(), "./model.pth")
