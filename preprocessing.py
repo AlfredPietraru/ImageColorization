@@ -23,9 +23,6 @@ def return_yuv_image(i : int):
     img_yuv = cv2.cvtColor(return_color_image(i), cv2.COLOR_RGB2YUV)
     return cv2.split(img_yuv)
 
-def return_evaluate_gray_image(i : int):
-    evaluate_gray_image = PATH_GRAY_EVALUATION_IMAGES + "evaluate_gray" + str(i) + ".jpg"
-    
 
 for i in range(1, 9, 1):
     image_name =  "image" + str(i) + ".jpg"

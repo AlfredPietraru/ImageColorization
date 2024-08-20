@@ -5,25 +5,6 @@ import preprocessing as prep
 from deep_colorization import DeepColorization 
 from skimage.feature import daisy
 
-def train_loop(model, optimizer):
-    model.train()
-    for k in range(1, 3, 1):
-        for i in range(1, 7, 1):
-            for j in range(40):
-                img = torch.Tensor(prep.return_gray_image(i))
-                pixels = tr.get_pixel_coordinates().int()
-                x_features = tr.merge_features(tr.extract_low_features(pixels, img), 
-                                    tr.extract_middle_features(pixels, img))
-                y_computed = model(x_features)
-                y_features = tr.create_y_values(pixels, i)
-                loss = tr.loss_function(y_computed, y_features)
-                print(loss)
-                loss.backward()
-                optimizer.step()
-                optimizer.zero_grad()
-        print("a terminat o imagine")
-        print()
-
 def pad_matrix(matrix):
     return torch.nn.functional.pad(matrix, 
                             (3, 3, 3, 3), mode='constant', value=0)
@@ -32,7 +13,7 @@ def pad_matrix(matrix):
 def yuv_to_rgb(y, u, v):
     u = u * 255 - 128.0
     v = v * 255 - 128.0
-    
+
     r = y + 1.402 * v
     g = y - 0.344136 * u - 0.714136 * v
     b = y + 1.772 * u
@@ -63,13 +44,12 @@ def evaluation(model):
     v = pad_matrix(torch.squeeze(v))
     return yuv_to_rgb(img, u, v)
 
-           
-model = DeepColorization()
-# optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-# train_loop(model, optimizer)
-final_image = evaluation(model)
-cv2.imshow("gata", final_image.numpy())
-cv2.waitKey(0)
+if __name__ == "__main__":
+    model = DeepColorization()
+    model.load_state_dict(torch.load("./model.pth"))    
+    final_image = evaluation(model)
+    cv2.imshow("gata", final_image.numpy())
+    cv2.waitKey(0)
 
 
 

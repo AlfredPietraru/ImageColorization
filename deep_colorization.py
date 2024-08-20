@@ -11,8 +11,9 @@ class DeepColorization(nn.Module):
             nn.Linear(input_size // 2, input_size // 2), 
             nn.ReLU(),
             nn.Linear(input_size // 2, input_size // 2),
-            nn.Tanh(),
+            nn.ReLU(),
             nn.Linear(input_size // 2, 2),
+            nn.Tanh()
         )
 
     def forward(self, x):

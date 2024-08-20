@@ -1,5 +1,6 @@
 
 import torch
+from deep_colorization import DeepColorization
 import preprocessing as prep
 from skimage.feature import daisy
 
@@ -50,3 +51,28 @@ def create_y_values(pixels : torch.Tensor, i : int):
 
 def loss_function(y_computed : torch.Tensor, y_features : torch.Tensor):
     return torch.sum(pow(torch.norm(y_computed-y_features), 2))
+
+def train_loop(model, optimizer):
+    model.train()
+    for k in range(1, 3, 1):
+        for i in range(1, 7, 1):
+            for j in range(40):
+                img = torch.Tensor(prep.return_gray_image(i))
+                pixels = get_pixel_coordinates().int()
+                x_features = merge_features(extract_low_features(pixels, img), 
+                                    extract_middle_features(pixels, img))
+                y_computed = model(x_features)
+                y_features = create_y_values(pixels, i)
+                loss = loss_function(y_computed, y_features)
+                print(loss)
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
+        print("a terminat o imagine")
+        print()
+
+if __name__ == "__main__":
+    model = DeepColorization()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+    train_loop(model, optimizer)
+    torch.save(model.state_dict(), "./model.pth")
