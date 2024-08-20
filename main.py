@@ -25,21 +25,18 @@ def train_loop(model, optimizer):
         print()
 
 def pad_matrix(matrix):
-    padding = (3, 3, 3, 3) 
-    padded_matrix = torch.nn.functional.pad(matrix, 
-                            padding, mode='constant', value=0)
-    
-    return padded_matrix
+    return torch.nn.functional.pad(matrix, 
+                            (3, 3, 3, 3), mode='constant', value=0)
 
-import torch
 
 def yuv_to_rgb(y, u, v):
     u = u * 255 - 128.0
     v = v * 255 - 128.0
-
+    
     r = y + 1.402 * v
     g = y - 0.344136 * u - 0.714136 * v
     b = y + 1.772 * u
+
 
     rgb = torch.stack([r, g, b], dim=-1)
     rgb = torch.clamp(rgb, 0, 255).byte()
@@ -48,8 +45,7 @@ def yuv_to_rgb(y, u, v):
 def evaluation(model):
     model.eval()
     img = torch.Tensor(prep.return_gray_image(8))
-    total_size = tr.MAXIM_INDEX - tr.MINIM_INDEX + 1
-    features = torch.zeros(pow(total_size, 2), 81)
+    features = torch.zeros(pow(tr.TOTAL_SIZE, 2), 81)
     descriptors = torch.Tensor(daisy(img, step=1, radius=1, histograms=3, orientations=8, rings=1))
     index = 0
     for i in range(tr.MINIM_INDEX, tr.MAXIM_INDEX + 1, 1):
@@ -61,7 +57,7 @@ def evaluation(model):
             features[index] = torch.cat((sub_area, descriptors[i][j]), 0)
             index += 1
     result = torch.Tensor(model(features)).reshape(
-        shape=(total_size, total_size, 2))
+        shape=(tr.TOTAL_SIZE, tr.TOTAL_SIZE, 2))
     u,v = result.chunk(2, dim=2)
     u = pad_matrix(torch.squeeze(u))
     v = pad_matrix(torch.squeeze(v))
@@ -72,7 +68,6 @@ model = DeepColorization()
 # optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 # train_loop(model, optimizer)
 final_image = evaluation(model)
-print(final_image.shape)
 cv2.imshow("gata", final_image.numpy())
 cv2.waitKey(0)
 
