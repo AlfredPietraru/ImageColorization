@@ -5,6 +5,7 @@ import preprocessing as prep
 from skimage.feature import daisy
 import torch.nn as nn
 
+
 WINDOW_SIZE = (7, 7)
 LOW_FEATURE_SIZE = 49
 MINIM_INDEX = WINDOW_SIZE[0] // 2 + 1
@@ -47,7 +48,7 @@ def create_y_values(pixels : torch.Tensor, i : int):
     for i in range(NR_SAMPLED_PIXELS):
         y_values[i][0] = u[pixels[i][0]][pixels[i][1]]
         y_values[i][1] = v[pixels[i][0]][pixels[i][1]]
-    return y_values / 128
+    return y_values / 255
 
 def train_loop(model, optimizer, loss_function):
     model.train()
@@ -60,13 +61,11 @@ def train_loop(model, optimizer, loss_function):
                                     extract_middle_features(pixels, img))
                 y_computed = model(x_features)
                 y_features = create_y_values(pixels, i)
-                print(torch.reshape(y_computed, shape=(1, len(y_computed) * 2)))
                 loss = loss_function(
                     torch.reshape(y_computed, shape=(1, len(y_computed) * 2)),
                     torch.reshape(y_features,shape=(1, len(y_features) * 2)) 
                         ),
-                print(loss)
-                print(loss)
+                print(loss[0])
                 optimizer.zero_grad()
                 loss[0].backward()
                 optimizer.step()

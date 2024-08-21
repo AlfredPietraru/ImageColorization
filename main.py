@@ -12,19 +12,16 @@ def pad_matrix(matrix):
 
 
 def yuv_to_rgb(y : torch.Tensor, u : torch.Tensor, v : torch.Tensor):
-    u = u * 255 - 128.0
-    v = v * 255 - 128.0
-
-    r : torch.Tensor = y + 1.402 * v
-    g : torch.Tensor = y - 0.344136 * u - 0.714136 * v
-    b : torch.Tensor = y + 1.772 * u
-    # print(r[0])
-    # cv2.imshow("rosu", r.detach().numpy())
-    # cv2.waitKey(0)
-
-    rgb = torch.stack([r, g, b], dim=-1)
-    rgb = torch.clamp(rgb, 0, 255).byte()
-    return rgb
+    y = y - 16
+    u = u - 128
+    v = v - 128
+    B = 1.164 * y + 2.018 * u
+    G = 1.164 * y - 0.813 * v - 0.391 * u
+    R = 1.164 * y + 1.596 * v
+    R = R.byte()
+    B = B.byte()
+    G = G.byte()
+    return torch.stack([R, G, B], dim=-1)
 
 def evaluation(model):
     model.eval()
@@ -43,9 +40,8 @@ def evaluation(model):
     result = torch.Tensor(model(features)).reshape(
         shape=(tr.TOTAL_SIZE, tr.TOTAL_SIZE, 2))
     u,v = result.chunk(2, dim=2)
-    print(u)
-    print(v)
     u = pad_matrix(torch.squeeze(u))
+    np.savetxt('try.txt', np.round(u.detach().numpy(), 3))
     v = pad_matrix(torch.squeeze(v))
     return yuv_to_rgb(img, u, v)
 
