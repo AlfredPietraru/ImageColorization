@@ -29,9 +29,8 @@ def extract_low_features(pixels : torch.Tensor, img : torch.Tensor):
                                 ].reshape(LOW_FEATURE_SIZE)
     return low_patch_feature
 
-def extract_middle_features(pixels: torch.Tensor, img : torch.Tensor):
-    descriptors = daisy(img, step=1, radius=1, histograms=3, orientations=8, rings=1)
-    descriptors = torch.Tensor(descriptors)
+def extract_middle_features(descriptors : torch.Tensor, 
+                            pixels: torch.Tensor):
     middle_features = torch.zeros(size=(NR_SAMPLED_PIXELS, 
                                         descriptors.shape[2])).float()
     for i in  range(NR_SAMPLED_PIXELS):
@@ -54,11 +53,13 @@ def train_loop(model, optimizer, loss_function):
     model.train()
     for k in range(1, 3, 1):
         for i in range(1, 7, 1):
+            img = torch.Tensor(prep.return_gray_image(i))
+            descriptors = torch.Tensor(daisy(img, step=1, radius=1, 
+                                             histograms=3, orientations=8, rings=1))
             for j in range(40):
-                img = torch.Tensor(prep.return_gray_image(i))
                 pixels = get_pixel_coordinates().int()
                 x_features = merge_features(extract_low_features(pixels, img), 
-                                    extract_middle_features(pixels, img))
+                                    extract_middle_features(descriptors, pixels))
                 y_computed = model(x_features)
                 y_features = create_y_values(pixels, i)
                 loss = loss_function(
