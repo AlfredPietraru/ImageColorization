@@ -1,0 +1,63 @@
+Disclaimer:
+Proiectul nu functioneaza asa cum ar trebui. Imaginile colorate pe 
+returneaza nu arata corespunzator cu imaginea color de la care s-a plecat.
+
+Am incercat sa implementez urmatorul document stiintific:
+https://openaccess.thecvf.com/content_iccv_2015/papers/Cheng_Deep_Colorization_ICCV_2015_paper.pdf
+
+L-am ales pe acesta deoarece mi s-a part diferit fata de alte documente pe aceeasi
+tema. Daca majoritatea modelelor de retele neurale lucreaza direct cu imaginea pe 
+care doresc sa o proceseze. Acesta lucreaza cu feature-uri pe care le extrage din 
+fiecare pixel al imaginii. Aceste feature-uri sunt impartite in 3 categorii:
+low, medium si high. Practic bazandu-ne pe un singur pixel, si pozitia acestuia, 
+obtineam 81 de numere care descriau diferite aspecte ale pixelului respectiv.
+De exemplu feature-rile din categoria low reprezentau intensitatea luminoasa
+a pixelilor din jur, iar valorile acestora erau extrase direct din imaginea 
+in gray scale. Apoi in categoria medium se aflau feature-urile extrase din algoritmul
+de features extraction Daisy. Din ce am inteles, acesta calculeaza derivatele dintre 
+intensitatile luminoase ale fiecarui pixel, incercand sa isi dea seama de 
+"directia" in care creste intensitatea luminoasa. Iar feature-urile din categoria high,
+reprezentau niste segmentari ale obiectelor care se regaseau in imagine, pentru a 
+imbunatatii liniile de la frontiera dintre obiecte, de exemplu se putea astfel diferentia
+mai usor cerul de pamant in apropierea liniei orizontului.
+Modelul de machine Learning, conform documentului, ar fi trebuit sa aiba un layer de 
+input si unul de output, si doar 3 hidden layer, iar functia principala de activare 
+folosita sa fie nn.ReLU deoarece duce la o convergenta mai rapida a modelului. 
+
+Un lucru nou pe care l-am invatat a fost sa lucrez cu diferite codificari pentru 
+imagini, in cazul de fata algoritmul folosea imagini in codificare LUV, in loc de 
+codificare RGB si am avut multe probleme pentru a face conversia intre cele 2 
+codificari.
+
+Un alt lucru a fost faptul ca m-am putut familiariza cu librarii de python precum
+OpenCV, Pytorch, Skimage, fiind prima data in care am avut ocazia sa le folosesc pe 
+toate 3 impreuna pentru a lucra la proiect. Libraria de OpenCV  s-a dovedit fenomenala
+in a realiza rapid si usor operatii pe imagini, conversii intre codificari de culoare,
+redimensionari si obtinerea imaginilor in grayscale ca date de intrare s-au facut toate 
+cu ajutorul librariei de OpenCv in fisierul preprocessing.py.
+
+In plus am descoperit capicitatile limbajului Python de a face operatii pe fisiere 
+folosind modulul os, fiind un limbaj de scripting mult mai puternic si usor de folosit
+decat Bash.
+
+In fisierul training.py, am facut etapa de antrenare, folosind 460 de imagini de 
+antrenament, restul de 8 pastrandu-le pentru etapa de evaluare pentru a vedea daca 
+se face corespunzator colorarea. In cod, sunt trecute doar 3 epoci. Dar in realitate 
+am rulat intreaga antrenare pentru aproximativ 30 de epoci. Ma foloseam de faptul ca 
+puteam salva valorile parametrilor intr-un fisier binar precum "./model.pth" pentru 
+a relua ulterior procesul de antrenament.
+Ideea principala a algoritmului era sa ma folosesc de faptul ca o codificare precum
+LUV, are doar 2 parametrii u si v care depind de culoare, L reprezentand intensitatea
+luminoasa a pixelului respectiv, fiind acelasi lucru cu imaginea gray scale. Scopul
+modelului de machine learning, era sa primeasca vectorul de feature-uri pentru fiecare
+pixel si sa produca cei 2 parametrii u si v, ca ulterior, sa se obtina pixelul 
+din imaginea colorata finala. Acest lucru se facea pentru fiecar pixel in parte.
+Modelul invata din imaginile anterioare, care pixel colorat deja intalnit in imaginile 
+de antrenament pare sa se potriveasca cel mai bine pixelul din imaginea alb negru.
+
+In fisierul main.py fac etapa de evaluare a imaginilor numerotate de la 461 - 468,
+rulez modelul si primesc valorile cromative u si v ale fiecarui pixel din imagine.
+Altfel compun imaginea color finala, si aplic algoritmul de bilateral filtering 
+folosind si imaginea alb negru pentru a delimita mai bine zonele de culoare.
+in folderul evaluation_images/ se regasesc rezultatele imaginilor colorate de algoritmul
+implementat de mine. 

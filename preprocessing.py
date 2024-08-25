@@ -2,7 +2,6 @@ import cv2
 import os
 
 SIZE = (512, 512)
-PATH_IMAGES = "training_images/initial_images/"
 PATH_COLOR_IMAGES = "training_images/preprocessed_images/"
 PATH_GRAY_IMAGES = "training_images/gray_scale_images/"
 PATH_GRAY_EVALUATION_IMAGES = "evaluation_images/gray_scale_images/"
@@ -23,9 +22,6 @@ def return_color_image(i : int):
 def return_yuv_image(i : int):
     img_yuv = cv2.cvtColor(return_color_image(i), cv2.COLOR_BGR2YUV)
     return cv2.split(img_yuv)
-
-
-
 
 # for i in range(88, 496, 1):
 #     image_name =  "image" + str(i) + ".png"
@@ -53,9 +49,9 @@ def get_new_name(idx : int):
 # for i in range(88, 496, 1):
 #      os.rename(get_current_img_path(i), get_new_name(i))
 
-
-for i in range(1, 468, 1):
-    image_path = new_color_img_path(i)
-    img = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    gray_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    cv2.imwrite(new_gray_img_path(i), gray_image)
+def create_gray_scale_image(start_idx : int, end_idx : int):
+    for i in range(start_idx, end_idx, 1):
+        image_path = new_color_img_path(i)
+        img = cv2.imread(image_path, cv2.IMREAD_COLOR)
+        gray_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        cv2.imwrite(new_gray_img_path(i), gray_image)

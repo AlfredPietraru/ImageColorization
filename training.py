@@ -14,6 +14,8 @@ NR_SAMPLED_PIXELS = 200
 LOW_FEATURE_SIZE = 49
 U_MAX = 0.436
 V_MAX = 0.615
+NUMBER_IMAGES = 460
+NUMBER_EPOCHS = 3
 
 low_patch_features = torch.zeros([NR_SAMPLED_PIXELS, LOW_FEATURE_SIZE], dtype=torch.int32)
 y_values = torch.zeros(size=(NR_SAMPLED_PIXELS, 2))
@@ -46,7 +48,7 @@ def merge_features(low_features : torch.Tensor,
     return torch.cat((low_features, middle_features), 1)
 
 def create_y_values(pixels : torch.Tensor, i : int):
-    _, u, v = prep.return_yuv_image(i)
+    y, u, v = prep.return_yuv_image(i)
     u = u - 128
     v = v - 128
     for i in range(NR_SAMPLED_PIXELS):
@@ -56,8 +58,8 @@ def create_y_values(pixels : torch.Tensor, i : int):
 
 def train_loop(model, optimizer, loss_function):
     model.train()
-    for k in range(1, 3, 1):
-        for i in range(1, 460, 1):
+    for k in range(1, NUMBER_EPOCHS, 1):
+        for i in range(1, NUMBER_IMAGES, 1):
             img = torch.Tensor(prep.return_gray_image(i))
             descriptors = torch.Tensor(daisy(img, step=1, radius=1, 
                                              histograms=3, orientations=8, rings=1))
