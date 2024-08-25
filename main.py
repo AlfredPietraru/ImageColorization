@@ -29,8 +29,7 @@ def yuv_to_rgb(y : torch.Tensor, u : torch.Tensor, v : torch.Tensor):
     B = y + 1.7790 * (u - 128)
     return torch.stack([R.byte(), G.byte(), B.byte()], dim=-1)
 
-def evaluation(model, idx : int):
-    model.eval()
+def evaluation_one_image(model, idx : int):
     img = torch.Tensor(prep.return_gray_image(idx))
     features = torch.zeros(pow(tr.TOTAL_SIZE, 2), 81)
     descriptors = torch.Tensor(daisy(img, step=1, radius=1, histograms=3, orientations=8, rings=1))
@@ -44,27 +43,18 @@ def evaluation(model, idx : int):
             features[index] = torch.cat((sub_area, descriptors[i][j]), 0)
             index += 1
     u, v = extract_model_result(torch.Tensor(model(features)))
-    return yuv_to_rgb(img, u, v)
+    rgb_image = yuv_to_rgb(img, u, v)
+    return cv2.ximgproc.jointBilateralFilter(prep.return_gray_image(idx),
+                rgb_image.numpy(), 10, sigmaColor=15, sigmaSpace=15)
+
+def evaluate(model, start_idx : int, end_idx : int):
+    for i in range(start_idx, end_idx, 1):
+        final_img = evaluation_one_image(model, i)
+        cv2.imwrite(prep.return_evaluation_path(i), final_img) 
 
 if __name__ == "__main__":
     model = DeepColorization()
-    model.load_state_dict(torch.load("./model.pth"))    
-    final_image = evaluation(model, 466)
-    final_image = cv2.ximgproc.jointBilateralFilter(prep.return_gray_image(466),
-                                                     final_image.numpy(), 10, sigmaColor=15, sigmaSpace=15) 
-    cv2.imshow("gata", final_image)
-    cv2.waitKey(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
+    model.load_state_dict(torch.load("./model.pth"))
+    model.eval()
+    evaluate(model, 461, 469)
 

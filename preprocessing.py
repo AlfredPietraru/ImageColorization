@@ -4,8 +4,8 @@ import os
 SIZE = (512, 512)
 PATH_COLOR_IMAGES = "training_images/preprocessed_images/"
 PATH_GRAY_IMAGES = "training_images/gray_scale_images/"
-PATH_GRAY_EVALUATION_IMAGES = "evaluation_images/gray_scale_images/"
-PATH_COLOR_EVALUATION_IMAGES = "evaluation_images/color_images/"
+PATH_PREPROCED_EVALUATION_IMAGES = "evaluation_images/ground_truth/"
+PATH_EVALUATION_IMAGES = "evaluation_images/computed/"
 
 def new_color_img_path(i : int):
     return PATH_COLOR_IMAGES + "color_image" + str(i) + ".jpg"
@@ -22,6 +22,9 @@ def return_color_image(i : int):
 def return_yuv_image(i : int):
     img_yuv = cv2.cvtColor(return_color_image(i), cv2.COLOR_BGR2YUV)
     return cv2.split(img_yuv)
+
+def return_evaluation_path(i : int):
+    return PATH_EVALUATION_IMAGES + "reconstructed" + str(i) + ".jpg" 
 
 # for i in range(88, 496, 1):
 #     image_name =  "image" + str(i) + ".png"
