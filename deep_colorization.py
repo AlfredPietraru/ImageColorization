@@ -30,8 +30,7 @@ class DeepColorization(nn.Module):
         x = self.leaky_relu(self.bn3(self.hidden3(x)))
         x = self.tanh(self.output(x))
         return x * torch.Tensor((0.436, 0.615))
-
-
+ 
 class OtherIdea(nn.Module):
     def __init__(self, input_size=81):
         super().__init__()
