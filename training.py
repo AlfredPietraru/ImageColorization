@@ -1,6 +1,6 @@
 
 import torch
-from deep_colorization import OtherIdea
+from deep_colorization import DeepColorization
 import preprocessing as prep
 from skimage.feature import daisy
 import torch.nn as nn
@@ -15,7 +15,7 @@ LOW_FEATURE_SIZE = 49
 U_MAX = 0.436
 V_MAX = 0.615
 NUMBER_IMAGES = 460
-NUMBER_EPOCHS = 5
+NUMBER_EPOCHS = 10
 
 low_patch_features = torch.zeros([NR_SAMPLED_PIXELS, LOW_FEATURE_SIZE], dtype=torch.int32)
 y_values = torch.zeros(size=(NR_SAMPLED_PIXELS, 2))
@@ -75,7 +75,8 @@ def train_loop(model, optimizer, loss_function):
         print("gata o epoca")
 
 if __name__ == "__main__":
-    model = OtherIdea()
+    model = DeepColorization()
+    model.load_state_dict(torch.load("./model.pth"))
     loss_function = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     train_loop(model, optimizer, loss_function)

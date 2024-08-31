@@ -17,6 +17,9 @@ class DeepColorization(nn.Module):
         self.hidden3 = nn.Linear(input_size // 2, input_size // 2)
         self.bn3 = nn.BatchNorm1d(input_size // 2)
         
+        self.hidden4 = nn.Linear(input_size // 2, input_size // 2)
+        self.bn4 = nn.BatchNorm1d(input_size // 2)
+        
         self.output = nn.Linear(input_size // 2, 2)
         
         self.relu = nn.ReLU()
@@ -28,8 +31,11 @@ class DeepColorization(nn.Module):
         x = self.leaky_relu(self.bn1(self.hidden1(x)))
         x = self.leaky_relu(self.bn2(self.hidden2(x)))
         x = self.leaky_relu(self.bn3(self.hidden3(x)))
+        x = self.leaky_relu(self.bn3(self.hidden4(x)))
         x = self.tanh(self.output(x))
         return x * torch.Tensor((0.436, 0.615))
+    
+    
  
 class OtherIdea(nn.Module):
     def __init__(self, input_size=81):
@@ -53,7 +59,6 @@ class OtherIdea(nn.Module):
         self.dropout = nn.Dropout(0.4)
 
     def forward(self, x):
-        # x = x.view(-1, self.input_channels, self.input_size, self.input_size)
         x = x.reshape(x.shape[0], 1, self.input_size, self.input_size)
         x = self.leaky_relu(self.bn1(self.conv1(x)))
         x = self.dropout(x)
@@ -63,5 +68,9 @@ class OtherIdea(nn.Module):
         x = self.dropout(x)
         x = self.leaky_relu(self.bn3(self.conv3(x)))
         x = self.dropout(x)
+        print(x.shape)
         x = x.view(x.size(0), -1)
-        return self.fc(x)
+        print(x.shape)
+        x = self.fc(x)
+        print(x.shape)
+        return x 
