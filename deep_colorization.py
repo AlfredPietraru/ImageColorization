@@ -1,6 +1,8 @@
 from torch import nn
 import torch
 
+import math
+
 U_MAX = 0.436
 V_MAX = 0.615
 
@@ -35,8 +37,30 @@ class DeepColorization(nn.Module):
         x = self.tanh(self.output(x))
         return x * torch.Tensor((0.436, 0.615))
     
-    
+
  
+class MainIdeea(nn.Module):
+    def __init__(self, input_size=81):
+        super().__init__()
+        self.size = int(math.sqrt(input_size))
+        self.conv1 = nn.Conv2d(1, 32, padding=0, kernel_size=3, stride=2, dilation=1)
+        self.conv2 = nn.Conv2d(32, 64, padding=0, kernel_size=3, stride=1, dilation=1)
+        self.conv3 = nn.Conv2d(64, 128, padding=0, kernel_size=2, stride=1, dilation=1)
+
+        self.avg1 = nn.AvgPool1d(kernel_size=5, stride=4)
+        self.avg2 = nn.AvgPool1d(kernel_size=12, stride=10)
+        self.relu = nn.LeakyReLU(0.3)
+        self.tanh = nn.Tanh()
+
+    def forward(self, x):
+        x = x.reshape(x.shape[0], 1, self.size, self.size)
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        x = self.relu(self.conv3(x))
+        x = x.reshape(x.shape[0], x.shape[1])
+        x = self.relu(self.avg1(x))
+        return self.tanh(self.avg2(x))
+
 class OtherIdea(nn.Module):
     def __init__(self, input_size=81):
         super().__init__()
