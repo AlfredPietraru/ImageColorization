@@ -10,10 +10,12 @@ WINDOW_SIZE = (7, 7)
 MINIM_INDEX = WINDOW_SIZE[0] // 2 + 1
 MAXIM_INDEX = prep.SIZE[0] - MINIM_INDEX + 1
 TOTAL_SIZE = MAXIM_INDEX - MINIM_INDEX + 1
-NR_SAMPLED_PIXELS = 200
+NR_SAMPLED_PIXELS = 2000
 LOW_FEATURE_SIZE = 49
 U_MAX = 0.436
 V_MAX = 0.615
+NUMBER_IMAGES = 460
+NUMBER_EPOCHS = 10
 
 low_patch_features = torch.zeros([NR_SAMPLED_PIXELS, LOW_FEATURE_SIZE], dtype=torch.int32)
 y_values = torch.zeros(size=(NR_SAMPLED_PIXELS, 2))
@@ -46,7 +48,7 @@ def merge_features(low_features : torch.Tensor,
     return torch.cat((low_features, middle_features), 1)
 
 def create_y_values(pixels : torch.Tensor, i : int):
-    _, u, v = prep.return_yuv_image(i)
+    y, u, v = prep.return_yuv_image(i)
     u = u - 128
     v = v - 128
     for i in range(NR_SAMPLED_PIXELS):
@@ -56,31 +58,25 @@ def create_y_values(pixels : torch.Tensor, i : int):
 
 def train_loop(model, optimizer, loss_function):
     model.train()
-    for k in range(1, 3, 1):
-        for i in range(1, 460, 1):
+    for k in range(0, NUMBER_EPOCHS, 1):
+        for i in range(1, NUMBER_IMAGES, 1):
             img = torch.Tensor(prep.return_gray_image(i))
             descriptors = torch.Tensor(daisy(img, step=1, radius=1, 
                                              histograms=3, orientations=8, rings=1))
-            for j in range(10):
-                pixels = get_pixel_coordinates().int()
-                x_features = merge_features(extract_low_features(pixels, img), 
-                                    extract_middle_features(descriptors, pixels))
-                y_computed = model(x_features)
-                y_features = create_y_values(pixels, i)
-                loss = loss_function(
-                    torch.reshape(y_computed, shape=(1, len(y_computed) * 2)),
-                    torch.reshape(y_features,shape=(1, len(y_features) * 2)) 
-                        ),
-                print(loss[0])
-                optimizer.zero_grad()
-                loss[0].backward()
-                optimizer.step()
-            print("a terminat o imagine")
+            pixels = get_pixel_coordinates().int()
+            x_features = merge_features(extract_low_features(pixels, img), 
+                                extract_middle_features(descriptors, pixels))
+            loss = loss_function(model(x_features), create_y_values(pixels, i)),
+            optimizer.zero_grad()
+            loss[0].backward()
+            optimizer.step()
+            print("total loss is: %f %d", loss[0], i)
+        torch.save(model.state_dict(), "./model.pth")
         print("gata o epoca")
 
 if __name__ == "__main__":
     model = DeepColorization()
+    model.load_state_dict(torch.load("./model.pth"))
     loss_function = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     train_loop(model, optimizer, loss_function)
-    torch.save(model.state_dict(), "./model.pth")
